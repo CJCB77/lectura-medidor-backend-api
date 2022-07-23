@@ -1,15 +1,8 @@
 -- Database: db_interagua
 
-DROP DATABASE IF EXISTS db_interagua;
+-- DROP DATABASE IF EXISTS db_interagua;
 
-CREATE DATABASE db_interagua
-    WITH
-    OWNER = postgres
-    ENCODING = 'UTF8'
-    LC_COLLATE = 'en_US.UTF-8'
-    LC_CTYPE = 'en_US.UTF-8'
-    TABLESPACE = pg_default
-    CONNECTION LIMIT = -1;
+-- CREATE DATABASE db_interagua;
     
     
 CREATE TABLE rol(
@@ -28,6 +21,7 @@ CREATE TABLE usuario(
 CREATE TABLE vivienda(
     id BIGSERIAL PRIMARY KEY,
     codigo VARCHAR(150) NOT NULL UNIQUE,
+    direccion VARCHAR(150) NOT NULL,
     mz VARCHAR(150) NOT NULL,
     villa VARCHAR(150) NOT NULL,
     
@@ -35,8 +29,8 @@ CREATE TABLE vivienda(
 
 CREATE TABLE registro(
     id BIGSERIAL PRIMARY KEY,
-    idUsuario BIGINT NOT NULL REFERENCES usuario(id),
-    codigoVivienda NOT NULL REFERENCES vivienda(codigo),
+    idUsuario BIGINT NOT NULL REFERENCES usuario(id) ON DELETE CASCADE,
+    codigoVivienda NOT NULL REFERENCES vivienda(codigo) ON DELETE CASCADE,
     imagen VARCHAR(150) NOT NULL,
     lectura VARCHAR(150),
     gps VARCHAR(150),
@@ -45,7 +39,7 @@ CREATE TABLE registro(
 
 CREATE TABLE tareas(
     id BIGSERIAL PRIMARY KEY,
-    idUsuario BIGINT NOT NULL REFERENCES usuario(id),
+    idUsuario BIGINT NOT NULL REFERENCES usuario(id) ON DELETE CASCADE,
     titulo VARCHAR(150) NOT NULL,
     descripcion VARCHAR(150) NOT NULL,
     fecha_creacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
