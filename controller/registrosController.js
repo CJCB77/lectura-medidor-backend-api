@@ -58,7 +58,7 @@ const getRegistroById = async (req, res) => {
 
 const createRegistro = async (req, res) => {
     var lectura = 0;
-    let imagen = "http://localhost:3000/" + req.file.path;
+    let imagen = "https://lectura-medidor-api.herokuapp.com/" + req.file.path;
     console.log(imagen);
     const {id_usuario,gps,codigo_vivienda} = req.body;
     //Make axios post imagen to http://localhost:8000/read TRY CATCH
