@@ -4,6 +4,7 @@ const registrosController = require('../controller/registrosController');
 
 //Multer para subir imagenes
 const multer = require('multer');
+const { append } = require('../validation/userSchema');
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, './uploads/')
@@ -14,6 +15,7 @@ const storage = multer.diskStorage({
 })
 
 const upload = multer({ storage: storage });
+
 
 router.get('/',registrosController.getRegistros);
 router.get('/complete',registrosController.getRegistroCompleto);

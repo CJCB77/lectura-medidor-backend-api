@@ -1,4 +1,8 @@
 const axios = require('axios').default;
+const {uploadFile} = require('../database/s3');
+const fs = require('fs');
+const util = require('util');
+const unlinkFile = util.promisify(fs.unlink);
 
 //Get db connection
 const db = require('../database/connection');
@@ -56,10 +60,19 @@ const getRegistroById = async (req, res) => {
     }
 }
 
+
 const createRegistro = async (req, res) => {
     var lectura = 0;
-    let imagen = "https://lectura-medidor-api.herokuapp.com/" + req.file.path;
+    const file = req.file;
+    console.log(file);
+    //Subir archivo a S3
+    const bucketResult = await uploadFile(file)
+    //Unlink file
+    await unlinkFile(file.path);
+    console.log(bucketResult);
+    const imagen =  bucketResult.Location
     console.log(imagen);
+
     const {id_usuario,gps,codigo_vivienda} = req.body;
     //Make axios post imagen to http://localhost:8000/read TRY CATCH
     try{
@@ -113,5 +126,5 @@ module.exports = {
     getRegistroById,
     createRegistro,
     updateRegistro,
-    deleteRegistro
+    deleteRegistro,
 }
