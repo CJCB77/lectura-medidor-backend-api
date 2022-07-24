@@ -76,7 +76,7 @@ const createRegistro = async (req, res) => {
     const {id_usuario,gps,codigo_vivienda} = req.body;
     //Make axios post imagen to http://localhost:8000/read TRY CATCH
     try{
-        const result = await axios.post('http://localhost:8000/read', {
+        const result = await axios.post('https://fast-api-ocr-medidor.herokuapp.com/read', {
             image: imagen});
         lectura = result.data.lectura;
     }
