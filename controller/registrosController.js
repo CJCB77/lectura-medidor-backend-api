@@ -33,7 +33,7 @@ const getRegistros = async (req, res) => {
 
 const getRegistroCompleto = async (req, res) => {
     try{
-        const query = `SELECT registro.id, registro.codigo_vivienda, usuario.username,lectura,
+        const query = `SELECT registro.id, registro.codigo_vivienda, registro.imagen_procesada , usuario.username,lectura,
         registro.fecha_creacion,vivienda.direccion,vivienda.mz,vivienda.villa,imagen,
         gps
         FROM registro 
@@ -63,6 +63,7 @@ const getRegistroById = async (req, res) => {
 
 const createRegistro = async (req, res) => {
     var lectura = 0;
+    var processedImage = null;
     const file = req.file;
     console.log(file);
     //Subir archivo a S3
@@ -76,18 +77,20 @@ const createRegistro = async (req, res) => {
     const {id_usuario,gps,codigo_vivienda} = req.body;
     //Make axios post imagen to http://localhost:8000/read TRY CATCH
     try{
-        const result = await axios.post('https://fast-api-ocr-medidor.herokuapp.com/read', {
+        const result = await axios.post('http://localhost:9000/filter', {
             image: imagen});
         lectura = result.data.lectura;
+        processedImage = result.data.url;
+        console.log(processedImage);
     }
     catch(err){
         console.log(err);
     }       
     try{
         const result = await db.query(`INSERT INTO registro 
-            (id_usuario, codigo_vivienda, imagen,lectura, gps) 
-            VALUES ($1, $2, $3, $4, $5) Returning * `, 
-            [id_usuario, codigo_vivienda, imagen,lectura, gps]);
+            (id_usuario, codigo_vivienda, imagen,lectura, gps,imagen_procesada) 
+            VALUES ($1, $2, $3, $4, $5, $6) Returning * `, 
+            [id_usuario, codigo_vivienda, imagen,lectura, gps, processedImage]);
         res.json({"Message": "Registro Creado", "Registro": result.rows[0]});
     }
     catch(err){
