@@ -77,7 +77,7 @@ const createRegistro = async (req, res) => {
     const {id_usuario,gps,codigo_vivienda} = req.body;
     //Make axios post imagen to http://localhost:8000/read TRY CATCH
     try{
-        const result = await axios.post('http://localhost:9000/filter', {
+        const result = await axios.post('https://api-tesseract-ocr.herokuapp.com/filter', {
             image: imagen});
         lectura = result.data.lectura;
         processedImage = result.data.url;
