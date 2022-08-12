@@ -19,11 +19,13 @@ const upload = multer({ storage: storage });
 
 router.get('/',registrosController.getRegistros);
 router.get('/complete',registrosController.getRegistroCompleto);
-router.post('/add',upload.single('imagen'),registrosController.createRegistro);
+router.post('/add',registrosController.createRegistro);
 
 router.get('/:id',registrosController.getRegistroById);
 router.put('/update/:id',registrosController.updateRegistro)
 router.delete('/delete/:id',registrosController.deleteRegistro);
+
+router.post('/lectura',upload.single('imagen'),registrosController.getLecturaImagen);
 
 
                                 

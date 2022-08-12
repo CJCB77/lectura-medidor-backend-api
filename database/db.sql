@@ -45,3 +45,42 @@ CREATE TABLE tareas(
     fecha_creacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
     
 );
+
+CREATE TABLE cliente(
+	id BIGSERIAL PRIMARY KEY,
+	cedula VARCHAR(10) NOT NULL UNIQUE,
+	nombres VARCHAR(150) NOT NULL,
+	apellidos VARCHAR(150) NOT NULL,
+	correo VARCHAR(150) NOT NULL,
+	celular VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE planilla(
+	id BIGSERIAL PRIMARY KEY,
+	cedula_cliente VARCHAR(10) NOT NULL REFERENCES cliente(cedula) ON DELETE CASCADE,
+	id_registro BIGSERIAL NOT NULL REFERENCES registro(id),
+	valor DECIMAL(10,2) NOT NULL,
+	fecha_pago DATE NOT NULL,
+	fecha_creacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE tareas DROP COLUMN descripcion;
+
+ALTER TABLE tareas ADD completada BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE tareas ADD codigo_vivienda VARCHAR(150) 
+NOT NULL REFERENCES vivienda(codigo) DEFAULT 'SAI102';
+
+DELETE FROM tareas WHERE codigo_vivienda = 'SAI102';
+
+INSERT INTO tareas(id_usuario,codigo_vivienda,titulo)
+VALUES(23,'CENT103','Tomar lectura de vivienda CENT103');
+
+ALTER TABLE vivienda 
+ADD COLUMN id_cliente VARCHAR(10) NOT NULL REFERENCES cliente(cedula) DEFAULT '0920340866';
+
+DELETE FROM registro WHERE imagen_procesada IS NULL;
+
+ALTER TABLE registro DROP COLUMN id_usuario;
+
+ALTER TABLE registro ADD COLUMN id_tarea BIGINT NOT NULL REFERENCES tareas(id) DEFAULT 18;

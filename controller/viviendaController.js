@@ -3,7 +3,8 @@ const db = require('../database/connection');
 
 const getViviendas = async (req, res) => {
     try{
-        const result = await db.query("SELECT * FROM vivienda");
+        const query = `SELECT * FROM vivienda`;
+        const result = await db.query(query);
         res.json(result.rows);
     }catch(err){
         console.log(err);
@@ -11,11 +12,11 @@ const getViviendas = async (req, res) => {
 }
 
 const createVivienda = async (req, res) => {
-    const {codigo,direccion,mz,villa} = req.body;
+    const {codigo,direccion,mz,villa,id_cliente} = req.body;
     try{
-        const query = `INSERT INTO vivienda (codigo, direccion, mz, villa) 
-            VALUES ($1, $2, $3, $4) RETURNING *`;
-        const result = await db.query(query, [codigo,direccion,mz,villa]);
+        const query = `INSERT INTO vivienda (codigo, direccion, mz, villa, id_cliente) 
+            VALUES ($1, $2, $3, $4, $5) RETURNING *`;
+        const result = await db.query(query, [codigo,direccion,mz,villa, id_cliente]);
         res.json({"Message":"Vivienda agregada","vivienda":result.rows[0]});
     }
     catch(err){

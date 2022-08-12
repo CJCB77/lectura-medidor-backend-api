@@ -13,6 +13,7 @@ const tareasRoutes = require('./routes/tareas');
 const viviendaRoutes = require('./routes/vivienda');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
+const clienteRoutes = require('./routes/cliente');
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use('/api/tareas',verifyToken, tareasRoutes);
 app.use('/api/viviendas',verifyToken, viviendaRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/usuarios',verifyToken, userRoutes);
+app.use('/api/clientes',verifyToken, clienteRoutes);
 
 require("dotenv").config();
 

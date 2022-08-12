@@ -33,12 +33,12 @@ const getRegistros = async (req, res) => {
 
 const getRegistroCompleto = async (req, res) => {
     try{
-        const query = `SELECT registro.id, registro.codigo_vivienda, registro.imagen_procesada , usuario.username,lectura,
-        registro.fecha_creacion,vivienda.direccion,vivienda.mz,vivienda.villa,imagen,
-        gps
-        FROM registro 
-        JOIN vivienda ON codigo_vivienda = vivienda.codigo
-        JOIN usuario ON registro.id_usuario = usuario.id
+        const query = `SELECT registro.id, registro.codigo_vivienda, imagen, imagen_procesada, lectura,
+        registro.fecha_creacion, gps, usuario.username, direccion,mz,villa
+        FROM registro
+        JOIN tareas ON registro.id_tarea = tareas.id
+        JOIN usuario ON tareas.id_usuario = usuario.id
+        JOIN vivienda ON registro.codigo_vivienda = vivienda.codigo
         ORDER BY registro.fecha_creacion DESC;`;
 
         const result = await db.query(query);
@@ -60,10 +60,7 @@ const getRegistroById = async (req, res) => {
     }
 }
 
-
-const createRegistro = async (req, res) => {
-    var lectura = 0;
-    var processedImage = null;
+const getLecturaImagen = async (req, res) => {
     const file = req.file;
     console.log(file);
     //Subir archivo a S3
@@ -73,25 +70,36 @@ const createRegistro = async (req, res) => {
     console.log(bucketResult);
     const imagen =  bucketResult.Location
     console.log(imagen);
-
-    const {id_usuario,gps,codigo_vivienda} = req.body;
-    //Make axios post imagen to http://localhost:8000/read TRY CATCH
     try{
-        const result = await axios.post('https://api-tesseract-ocr.herokuapp.com/filter', {
+        const result = await axios.post('http://localhost:8000/filter', {
             image: imagen});
-        lectura = result.data.lectura;
         processedImage = result.data.url;
         console.log(processedImage);
+        res.json({processedImage, imagen});
+        
+    }catch(err){
+        console.log(err);
+    }
+}
+
+const createRegistro = async (req, res) => {
+   
+    const {id_tarea,gps,codigo_vivienda,imagen,imagen_procesada,lectura} = req.body;
+
+    try{
+        const result = await db.query(`INSERT INTO registro 
+            (id_tarea, codigo_vivienda, imagen,lectura, gps,imagen_procesada) 
+            VALUES ($1, $2, $3, $4, $5, $6) Returning * `, 
+            [id_tarea, codigo_vivienda, imagen,lectura, gps, imagen_procesada]);
+        res.json({"Message": "Registro Creado", "Registro": result.rows[0]});
     }
     catch(err){
         console.log(err);
-    }       
+    }
     try{
-        const result = await db.query(`INSERT INTO registro 
-            (id_usuario, codigo_vivienda, imagen,lectura, gps,imagen_procesada) 
-            VALUES ($1, $2, $3, $4, $5, $6) Returning * `, 
-            [id_usuario, codigo_vivienda, imagen,lectura, gps, processedImage]);
-        res.json({"Message": "Registro Creado", "Registro": result.rows[0]});
+        await db.query(`UPDATE tareas 
+            SET completada = $1 WHERE id = $2`, 
+            [true, id_tarea]);
     }
     catch(err){
         console.log(err);
@@ -130,4 +138,5 @@ module.exports = {
     createRegistro,
     updateRegistro,
     deleteRegistro,
+    getLecturaImagen
 }

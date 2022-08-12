@@ -14,6 +14,18 @@ const listarUsuarios = async (req, res) => {
     }
 }
 
+//Get usuario
+const getUsuario = async (req, res) => {
+    const {id} = req.params;
+    try{
+        const result = await db.query("SELECT * FROM usuario WHERE id = $1", [id]);
+        res.json(result.rows[0]);
+    }
+    catch(err){
+        console.log(err);
+    }
+}
+
 const updateUsuario = async (req, res) => {
     const {id} = req.params;
     const {username,password,role} = req.body;
@@ -43,5 +55,6 @@ const eliminarUsuario = async (req, res) => {
 module.exports = {
     listarUsuarios,
     eliminarUsuario,
-    updateUsuario
+    updateUsuario,
+    getUsuario
 }
