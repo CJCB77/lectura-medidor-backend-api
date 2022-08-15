@@ -14,6 +14,7 @@ const viviendaRoutes = require('./routes/vivienda');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const clienteRoutes = require('./routes/cliente');
+const planillaRoutes = require('./routes/planillas');
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use('/api/viviendas',verifyToken, viviendaRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/usuarios',verifyToken, userRoutes);
 app.use('/api/clientes',verifyToken, clienteRoutes);
+app.use('/api/planillas',verifyToken, planillaRoutes);
 
 require("dotenv").config();
 

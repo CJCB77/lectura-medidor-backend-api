@@ -84,3 +84,15 @@ DELETE FROM registro WHERE imagen_procesada IS NULL;
 ALTER TABLE registro DROP COLUMN id_usuario;
 
 ALTER TABLE registro ADD COLUMN id_tarea BIGINT NOT NULL REFERENCES tareas(id) DEFAULT 18;
+
+ALTER TABLE registro ADD COLUMN ult_registro BIGINT REFERENCES registro(id);
+
+CREATE TABLE planilla(
+    id BIGSERIAL PRIMARY KEY,
+    codigo_vivienda VARCHAR(150) NOT NULL REFERENCES vivienda(codigo) ON DELETE CASCADE,
+    id_registro BIGSERIAL NOT NULL REFERENCES registro(id),
+    energia_consumida INTEGER NOT NULL,
+    valor DECIMAL(10,2) NOT NULL,
+    fecha_vencimiento DATE NOT NULL,
+    fecha_emision TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

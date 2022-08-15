@@ -33,7 +33,7 @@ const getRegistros = async (req, res) => {
 
 const getRegistroCompleto = async (req, res) => {
     try{
-        const query = `SELECT registro.id, registro.codigo_vivienda, imagen, imagen_procesada, lectura,
+        const query = `SELECT registro.id,registro.ult_registro, registro.codigo_vivienda, imagen, imagen_procesada, lectura,
         registro.fecha_creacion, gps, usuario.username, direccion,mz,villa
         FROM registro
         JOIN tareas ON registro.id_tarea = tareas.id
@@ -71,7 +71,7 @@ const getLecturaImagen = async (req, res) => {
     const imagen =  bucketResult.Location
     console.log(imagen);
     try{
-        const result = await axios.post('http://localhost:8000/filter', {
+        const result = await axios.post('http://localhost:9000/filter', {
             image: imagen});
         processedImage = result.data.url;
         console.log(processedImage);
@@ -85,12 +85,23 @@ const getLecturaImagen = async (req, res) => {
 const createRegistro = async (req, res) => {
    
     const {id_tarea,gps,codigo_vivienda,imagen,imagen_procesada,lectura} = req.body;
-
+    let ultimoRegistro = null
+    try{
+        let query = `SELECT DISTINCT ON(fecha_creacion) fecha_creacion,id, codigo_vivienda,lectura
+        FROM registro
+        WHERE codigo_vivienda='${codigo_vivienda}'
+        ORDER BY fecha_creacion DESC;`;
+        const result = await db.query(query);
+        ultimoRegistro = result.rows[0].id;
+    }
+    catch(err){
+        console.log(err);
+    }
     try{
         const result = await db.query(`INSERT INTO registro 
-            (id_tarea, codigo_vivienda, imagen,lectura, gps,imagen_procesada) 
-            VALUES ($1, $2, $3, $4, $5, $6) Returning * `, 
-            [id_tarea, codigo_vivienda, imagen,lectura, gps, imagen_procesada]);
+            (id_tarea, codigo_vivienda, imagen,lectura, gps,imagen_procesada,ult_registro) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7) Returning * `, 
+            [id_tarea, codigo_vivienda, imagen,lectura, gps, imagen_procesada, ultimoRegistro]);
         res.json({"Message": "Registro Creado", "Registro": result.rows[0]});
     }
     catch(err){
@@ -106,12 +117,15 @@ const createRegistro = async (req, res) => {
     }
 }
 
+
+
 const updateRegistro = async (req, res) => {
     const {id} = req.params;
     const {id_usuario,imagen,lectura,gps,codigo_vivienda} = req.body;
+    
     try{
         const result = await db.query(`UPDATE registro 
-            SET id_usuario = $1, imagen = $2, lectura = $3, gps = $4, codigo_vivienda = $5
+            SET id_usuario = $1, imagen = $2, lectura = $3, gps = $4, codigo_vivienda = $5, ult_registro = $5
             WHERE id = $6 RETURNING *`, 
             [id_usuario,imagen, lectura, gps, codigo_vivienda, id]);
         res.json({"Message": "Registro Actualizado", "Registro": result.rows[0]});
