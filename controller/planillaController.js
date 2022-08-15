@@ -112,7 +112,7 @@ const generarPdf = async (req, res) => {
     const fechaVencimientoFormatted = `${(fecha_vencimiento.getMonth() + 1)}/${fecha_vencimiento.getDate()}/${fecha_vencimiento.getFullYear()}`;
  
     const doc = new PDFDocument({bufferPages: true});
-    doc.fontSize(16);
+    doc.fontSize(24);
     const stream = res.writeHead(200, {
         'Content-Type': 'application/pdf',
         'Content-disposition': `attachment; filename=${id}_planilla.pdf`

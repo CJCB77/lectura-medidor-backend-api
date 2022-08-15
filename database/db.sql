@@ -55,15 +55,6 @@ CREATE TABLE cliente(
 	celular VARCHAR(50) NOT NULL
 );
 
-CREATE TABLE planilla(
-	id BIGSERIAL PRIMARY KEY,
-	cedula_cliente VARCHAR(10) NOT NULL REFERENCES cliente(cedula) ON DELETE CASCADE,
-	id_registro BIGSERIAL NOT NULL REFERENCES registro(id),
-	valor DECIMAL(10,2) NOT NULL,
-	fecha_pago DATE NOT NULL,
-	fecha_creacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
 ALTER TABLE tareas DROP COLUMN descripcion;
 
 ALTER TABLE tareas ADD completada BOOLEAN DEFAULT FALSE;
