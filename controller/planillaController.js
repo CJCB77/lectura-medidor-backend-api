@@ -26,7 +26,8 @@ const getPlanillas = async (req, res) => {
         planilla.codigo_vivienda, fecha_emision
         FROM planilla
         JOIN vivienda ON vivienda.codigo = planilla.codigo_vivienda
-        JOIN cliente ON cliente.cedula = vivienda.id_cliente;`;
+        JOIN cliente ON cliente.cedula = vivienda.id_cliente
+        ORDER BY fecha_emision DESC;`;
         const result = await db.query(query);
         res.json(result.rows);
     }catch(err){
