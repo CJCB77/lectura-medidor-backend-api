@@ -1,6 +1,8 @@
+const axios = require('axios').default;
+
+
 const db = require('../database/connection');
 const PDFDocument = require('pdfkit');
-
 
 async function calcularCosto(lectura, ult_registro){
     let costo = 0;
@@ -73,6 +75,7 @@ const updatePlanilla = async (req, res) => {
     }
 }
 
+
 const deletePlanilla = async (req, res) => {
     const {id} = req.params;
     try{
@@ -87,14 +90,16 @@ const deletePlanilla = async (req, res) => {
 const generarPdf = async (req, res) => {
     const {id} = req.params;
     let planilla = {};
+    let data = null;
 
     try{
-        const query = `SELECT planilla.id, valor, cliente.nombres, cliente.apellidos,cliente.cedula,
+        const query = `SELECT planilla.id, registro.imagen_procesada , valor, cliente.nombres, cliente.apellidos,cliente.cedula,
         vivienda.direccion,vivienda.villa,vivienda.mz, planilla.fecha_emision, planilla.fecha_vencimiento, planilla.energia_consumida
         FROM planilla
         JOIN vivienda ON vivienda.codigo = planilla.codigo_vivienda
         JOIN cliente ON cliente.cedula = vivienda.id_cliente
-        WHERE planilla.id = $1`;
+		JOIN registro ON registro.id = planilla.id_registro
+        WHERE planilla.id = $1;`;
         const result = await db.query(query, [id]);
         console.log(result.rows[0]);
         planilla = result.rows[0];
@@ -111,7 +116,11 @@ const generarPdf = async (req, res) => {
     const fechaEmisionFormatted = `${(fecha_emision.getMonth() + 1)}/${fecha_emision.getDate()}/${fecha_emision.getFullYear()}`;
     const fecha_vencimiento = planilla.fecha_vencimiento;
     const fechaVencimientoFormatted = `${(fecha_vencimiento.getMonth() + 1)}/${fecha_vencimiento.getDate()}/${fecha_vencimiento.getFullYear()}`;
- 
+    const imagen = planilla.imagen_procesada;
+    
+    //Get img buffer
+    let image = await axios.get(imagen, {responseType: 'arraybuffer'});
+
     const doc = new PDFDocument({bufferPages: true});
     doc.fontSize(24);
     const stream = res.writeHead(200, {
@@ -155,6 +164,14 @@ const generarPdf = async (req, res) => {
     doc.moveDown();
     doc.text('Consumo de energia: ' + consumoEnergia + ' Kwh').moveDown();
     doc.text('Valor: $' + valor).moveDown();
+    doc.moveDown();
+    doc.text('Imagen', {
+        underline: true
+    });
+    doc.moveDown();
+    doc.image(image.data, {
+        fit: [500, 500]
+    });
     doc.end();
 }
 
