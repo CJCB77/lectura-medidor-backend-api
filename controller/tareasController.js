@@ -8,7 +8,7 @@ const getTareas = async (req, res) => {
     const username = req.query.username;
     if(user_id){
         try{
-            const query = `SELECT tareas.id, titulo,codigo_vivienda,direccion,mz,villa  
+            const query = `SELECT tareas.id,codigo_vivienda,direccion,mz,villa  
             FROM tareas 
             JOIN vivienda ON codigo_vivienda = codigo 
             WHERE id_usuario = $1 AND completada = false
@@ -23,7 +23,7 @@ const getTareas = async (req, res) => {
 
     if(username){
         try{
-            const query = `SELECT tareas.id, titulo,tareas.completada, tareas.fecha_creacion, username 
+            const query = `SELECT tareas.id, codigo_vivienda,tareas.completada, tareas.fecha_creacion, username 
                 FROM tareas JOIN usuario ON usuario.id = id_usuario ORDER BY tareas.fecha_creacion DESC;`;
             const result = await db.query(query);
             return res.json(result.rows);
@@ -42,7 +42,7 @@ const getTareas = async (req, res) => {
 }
 
 const createTarea = async (req, res) => {
-    const {usuario,titulo,codigo_vivienda} = req.body;
+    const {usuario,codigo_vivienda} = req.body;
     console.log(usuario);
     let id_usuario = null
     //Get usuario id from database
@@ -55,8 +55,8 @@ const createTarea = async (req, res) => {
     }
     try{
         //Create new tarea
-        const query2 = `INSERT INTO tareas (id_usuario, titulo, codigo_vivienda) VALUES ($1, $2, $3) RETURNING *`;
-        const result2 = await db.query(query2, [id_usuario,titulo,codigo_vivienda]);
+        const query2 = `INSERT INTO tareas (id_usuario, codigo_vivienda) VALUES ($1, $2) RETURNING *`;
+        const result2 = await db.query(query2, [id_usuario,codigo_vivienda]);
         res.status(200).json({Message:"Tarea creada",tarea:result2.rows[0]});
     }catch(err){
         console.log(err);
@@ -76,10 +76,10 @@ const getTareaById = async (req, res) => {
 
 const updateTarea = async (req, res) => {
     const {id} = req.params;
-    const {titulo,completada} = req.body;
+    const {completada} = req.body;
     try {
-        const query = `UPDATE tareas SET titulo = $1, completada = $2 WHERE id = $3 RETURNING *`;
-        const result = await db.query(query, [titulo,completada,id]);
+        const query = `UPDATE tareas SET  completada = $1 WHERE id = $2 RETURNING *`;
+        const result = await db.query(query, [completada,id]);
         res.status(200).json({"Message":"Tarea actualizada","tarea":result.rows[0]});
     } catch (err) {
         console.log(err);

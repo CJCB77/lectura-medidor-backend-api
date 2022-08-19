@@ -1,5 +1,6 @@
-const axios = require('axios').default;
-
+//const axios = require('axios').default;
+const path = require('path');
+const sizeOf = require('image-size');
 
 const db = require('../database/connection');
 const PDFDocument = require('pdfkit');
@@ -116,13 +117,18 @@ const generarPdf = async (req, res) => {
     const fechaEmisionFormatted = `${(fecha_emision.getMonth() + 1)}/${fecha_emision.getDate()}/${fecha_emision.getFullYear()}`;
     const fecha_vencimiento = planilla.fecha_vencimiento;
     const fechaVencimientoFormatted = `${(fecha_vencimiento.getMonth() + 1)}/${fecha_vencimiento.getDate()}/${fecha_vencimiento.getFullYear()}`;
-    const imagen = planilla.imagen_procesada;
-    
-    //Get img buffer
-    let image = await axios.get(imagen, {responseType: 'arraybuffer'});
 
-    const doc = new PDFDocument({bufferPages: true});
-    doc.fontSize(24);
+    //Use ../images/logo.png as logo
+    const logo = path.join(__dirname, '../images/logo.png');
+    //Get logo width and height
+    const {width, height} = await sizeOf(logo);
+
+    const doc = new PDFDocument({
+        bufferPages: true,
+        size: [612, 1200],
+    });
+
+    doc.fontSize(28);
     const stream = res.writeHead(200, {
         'Content-Type': 'application/pdf',
         'Content-disposition': `attachment; filename=${id}_planilla.pdf`
@@ -136,21 +142,47 @@ const generarPdf = async (req, res) => {
         console.log(err);
     })
 
-    doc.text('Planilla de Consumo', {
-        underline: true
-    });
+    doc.text(`Empresa Electrica`, {
+        align: 'center',
+        bold: true
+    }).fontSize(18);
+    //Logo
+    doc.image(logo,{
+        fit: [doc.page.width / 2 + 150 , 200],
+        align: 'center',
+        valign: 'center',
+    }).moveDown();
+    doc.text(`Cdla. Garzota, sector 3, mz 47, Dr.Luis Augusto Mendoza Moreira, Guayaquil 090513`, {
+        align: 'center'
+    })
+    doc.text(`RUC: 2054010101001`, {
+        align: 'center'
+    }).moveDown();
+    doc.text(`Telf: (04) 380-1900 ext. 5436`, {
+        align: 'center'
+    }).moveDown();
+    doc.fontSize(24)
     doc.moveDown();
-    doc.text('Factura N°: ' + id)
+    doc.text('Planilla de Consumo', {
+        underline: true,
+        align: 'center'
+    });
+    doc.fontSize(18);
     doc.moveDown();
     doc.text('Fecha de Emisión: ' + fechaEmisionFormatted)
+    doc.moveDown();
+    doc.text('Factura N°: ' + id)
     doc.moveDown();
     doc.text('Fecha de Vencimiento: ' + fechaVencimientoFormatted)
     doc.moveDown();
     doc.moveDown();
+    doc.fontSize(24)
     doc.text('Datos Cliente', {
-        underline: true
+        underline: true,
+        align: 'center'
     });
     doc.moveDown();
+    doc.fontSize(18);
     doc.text('Nombre: ' + nombreCompleto)
     doc.moveDown();
     doc.text('Cedula: ' + cedula)
@@ -158,20 +190,17 @@ const generarPdf = async (req, res) => {
     doc.text('Dirección: ' + direccion)
     doc.moveDown();
     doc.moveDown();
+    doc.fontSize(24)
     doc.text('Consumo de energia', {
-        underline: true
+        underline: true,
+        align: 'center'
     });
+    doc.fontSize(18);
     doc.moveDown();
     doc.text('Consumo de energia: ' + consumoEnergia + ' Kwh').moveDown();
     doc.text('Valor: $' + valor).moveDown();
     doc.moveDown();
-    doc.text('Imagen', {
-        underline: true
-    });
     doc.moveDown();
-    doc.image(image.data, {
-        fit: [500, 500]
-    });
     doc.end();
 }
 
