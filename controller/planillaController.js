@@ -95,7 +95,8 @@ const generarPdf = async (req, res) => {
 
     try{
         const query = `SELECT planilla.id, registro.imagen_procesada , valor, cliente.nombres, cliente.apellidos,cliente.cedula,
-        vivienda.direccion,vivienda.villa,vivienda.mz, planilla.fecha_emision, planilla.fecha_vencimiento, planilla.energia_consumida
+        vivienda.direccion,vivienda.villa,vivienda.mz, planilla.fecha_emision, planilla.fecha_vencimiento, 
+        planilla.energia_consumida, registro.lectura
         FROM planilla
         JOIN vivienda ON vivienda.codigo = planilla.codigo_vivienda
         JOIN cliente ON cliente.cedula = vivienda.id_cliente
@@ -117,18 +118,18 @@ const generarPdf = async (req, res) => {
     const fechaEmisionFormatted = `${(fecha_emision.getMonth() + 1)}/${fecha_emision.getDate()}/${fecha_emision.getFullYear()}`;
     const fecha_vencimiento = planilla.fecha_vencimiento;
     const fechaVencimientoFormatted = `${(fecha_vencimiento.getMonth() + 1)}/${fecha_vencimiento.getDate()}/${fecha_vencimiento.getFullYear()}`;
+    const lectura = planilla.lectura;
+    console.log(lectura);
 
     //Use ../images/logo.png as logo
     const logo = path.join(__dirname, '../images/logo.png');
-    //Get logo width and height
-    const {width, height} = await sizeOf(logo);
 
     const doc = new PDFDocument({
         bufferPages: true,
         size: [612, 1200],
     });
 
-    doc.fontSize(28);
+
     const stream = res.writeHead(200, {
         'Content-Type': 'application/pdf',
         'Content-disposition': `attachment; filename=${id}_planilla.pdf`
@@ -142,10 +143,7 @@ const generarPdf = async (req, res) => {
         console.log(err);
     })
 
-    doc.text(`Empresa Electrica`, {
-        align: 'center',
-        bold: true
-    }).fontSize(18);
+    doc.fontSize(20);
     //Logo
     doc.image(logo,{
         fit: [doc.page.width / 2 + 150 , 200],
@@ -161,46 +159,65 @@ const generarPdf = async (req, res) => {
     doc.text(`Telf: (04) 380-1900 ext. 5436`, {
         align: 'center'
     }).moveDown();
-    doc.fontSize(24)
+    doc.moveDown();
+    doc.fontSize(28)
+    doc.text(`Datos cliente`, {
+        align: 'center',
+        bold: true,
+        underline: true
+    }).moveDown();
+    doc.fontSize(20);
+    doc.text('Nombre: ' + nombreCompleto, {
+        align: 'center'
+    })
+    doc.moveDown();
+    doc.text('Cedula: ' + cedula, {
+        align: 'center'
+    })
+    doc.moveDown();
+    doc.text('Dirección: ' + direccion, {
+        align: 'center'
+    })
+    doc.fontSize(28)
+    doc.moveDown();
     doc.moveDown();
     doc.text('Planilla de Consumo', {
         underline: true,
-        align: 'center'
+        align: 'center',
+
     });
-    doc.fontSize(18);
+    doc.fontSize(20);
     doc.moveDown();
-    doc.text('Fecha de Emisión: ' + fechaEmisionFormatted)
-    doc.moveDown();
-    doc.text('Factura N°: ' + id)
-    doc.moveDown();
-    doc.text('Fecha de Vencimiento: ' + fechaVencimientoFormatted)
-    doc.moveDown();
-    doc.moveDown();
-    doc.fontSize(24)
-    doc.text('Datos Cliente', {
-        underline: true,
+    doc.text('Fecha de Emisión: ' + fechaEmisionFormatted, {
         align: 'center'
-    });
+    })
     doc.moveDown();
-    doc.fontSize(18);
-    doc.text('Nombre: ' + nombreCompleto)
+    doc.text('Factura N°: ' + id, {
+        align: 'center'
+    })
     doc.moveDown();
-    doc.text('Cedula: ' + cedula)
+    doc.text('Fecha de Vencimiento: ' + fechaVencimientoFormatted, {
+        align: 'center'
+    })
     doc.moveDown();
-    doc.text('Dirección: ' + direccion)
     doc.moveDown();
-    doc.moveDown();
-    doc.fontSize(24)
+    doc.fontSize(28)
+    doc.fontSize(28)
     doc.text('Consumo de energia', {
         underline: true,
         align: 'center'
     });
-    doc.fontSize(18);
+    doc.fontSize(20);
     doc.moveDown();
-    doc.text('Consumo de energia: ' + consumoEnergia + ' Kwh').moveDown();
-    doc.text('Valor: $' + valor).moveDown();
-    doc.moveDown();
-    doc.moveDown();
+    doc.text('Lectura: ' + lectura, {
+        align: 'center'
+    }).moveDown();
+    doc.text('Consumo electrico: ' + consumoEnergia + ' Kwh', {
+        align: 'center'
+    }).moveDown();
+    doc.text('Valor: $' + valor, {
+        align: 'center'
+    }).moveDown();
     doc.end();
 }
 

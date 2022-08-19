@@ -24,7 +24,10 @@ const getTareas = async (req, res) => {
     if(username){
         try{
             const query = `SELECT tareas.id, codigo_vivienda,tareas.completada, tareas.fecha_creacion, username 
-                FROM tareas JOIN usuario ON usuario.id = id_usuario ORDER BY tareas.fecha_creacion DESC;`;
+            FROM tareas 
+            JOIN usuario ON usuario.id = id_usuario 
+            WHERE tareas.completada = false
+            ORDER BY tareas.fecha_creacion DESC;`;
             const result = await db.query(query);
             return res.json(result.rows);
         }
