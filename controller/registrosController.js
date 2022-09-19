@@ -71,7 +71,7 @@ const getLecturaImagen = async (req, res) => {
     const imagen =  bucketResult.Location
     console.log(imagen);
     try{
-        const result = await axios.post('https://procesamiento-vision-medidor.herokuapp.com/filter', {
+        const result = await axios.post('https://procesamiento-api.herokuapp.com/filter', {
             image: imagen});
         processedImage = result.data.url;
         console.log(processedImage);
